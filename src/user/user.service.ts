@@ -1,6 +1,7 @@
 import { Injectable, Inject, InternalServerErrorException } from '@nestjs/common';
 import { Knex } from 'knex';
 import { User } from './user.model';
+import { IRequestUser } from 'src/middleware/interfaces/i-request-user';
 
 @Injectable()
 export class UserService {
@@ -15,16 +16,16 @@ export class UserService {
         }
     }
 
-    async createUser(name: string, email: string): Promise<{ status: boolean; data?: User }> {
+    async registerUser({ id, name, email }: IRequestUser): Promise<{ status: boolean; data?: User }> {
         try {
-            await this.knex<User>('users').insert({ name, email });
-            let user = await this.knex<User>('users').where({ email }).first();
+            await this.knex<User>('users').insert({ remote_user_id: id, name, email, });
+            let registeredUser = await this.knex<User>('users').where({ email }).first();
 
-            if (!user) return { status: false }
-            
-            return { status: true, data: user };
+            if (!registeredUser) return { status: false }
+
+            return { status: true, data: registeredUser };
         } catch (error) {
-            throw new InternalServerErrorException('Failed to create user');
+            throw new InternalServerErrorException('Failed to register user');
         }
     }
 
