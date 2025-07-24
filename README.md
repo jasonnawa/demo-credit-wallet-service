@@ -24,24 +24,24 @@ src/
 │ ├── adjutor.module.ts
 │ ├── adjutor.service.ts
 │ └── dto/
-│ └── karma-blacklist.dto.ts
+│   └── karma-response.dto.ts
 │
 ├── users/
 │ ├── user.controller.ts
 │ ├── user.module.ts
 │ ├── user.service.ts
-│ └── entities/user.entity.ts
+│ └── user.model.ts
 │
 ├── wallets/
 │ ├── wallet.controller.ts
 │ ├── wallet.module.ts
 │ ├── wallet.service.ts
-│ └── entities/wallet.entity.ts
+│ └── wallet.model.ts
 │
 ├── transactions/
 │ ├── transaction.module.ts
 │ ├── transaction.service.ts
-│ └── entities/transaction.entity.ts
+│ └── transaction.model.ts
 │
 ├── middleware/
 │ └── faux-auth.middleware.ts
@@ -162,12 +162,8 @@ Authorization: Bearer <API_KEY>
 
 
 ## 🧪 How to Run Tests
-
-> ⚠️ _Tests not implemented yet. This section will be updated once test coverage is added._
-
-Expected:
 - Unit tests for services using `Jest`
-- E2E tests for full request-response cycles
+> npm run test
 
 ---
 
@@ -197,8 +193,8 @@ npm run start:dev
 - [x] Wallet create / fund / withdraw / transfer  
 - [x] Transaction logging  
 - [x] Adjutor integration  
-- [ ] Tests (unit & e2e)
-- [ ] E-R Diagram
+- [x] Tests (unit)
+- [x] E-R Diagram
 
 
 
