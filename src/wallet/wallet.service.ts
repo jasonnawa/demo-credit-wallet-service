@@ -1,9 +1,17 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { TransactionStatus, TransactionDirection, TransactionType } from 'src/transaction/transaction.model';
 import { Knex } from 'knex';
+import { TransactionService } from 'src/transaction/transaction.service';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class WalletService {
-    constructor(@Inject('KNEX_CONNECTION') private readonly knex: Knex) { }
+    constructor(
+        @Inject('KNEX_CONNECTION') private readonly knex: Knex,
+        private readonly transactionService: TransactionService,
+        @Inject(forwardRef(() => UserService))
+        private readonly userService: UserService,
+    ) { }
 
     async createWallet(userId: number): Promise<any> {
 
@@ -23,5 +31,36 @@ export class WalletService {
 
         const wallet = await this.knex('wallets').where({ id: insertedId }).first();
         return wallet;
+    }
+
+    async fundWallet(remoteUserId: number, amount: number) {
+
+        const user = await this.userService.getUserByRemoteId(remoteUserId);
+
+        if (!user) return { status: false, message: 'User not found' }
+
+        const wallet = await this.knex('wallets').where({ user_id: user.id }).first();
+        if (!wallet) throw new NotFoundException('Wallet not found');
+
+        // Update balance
+        await this.knex('wallets')
+            .where({ id: wallet.id })
+            .increment('balance', amount);
+
+        const updatedWallet = await this.knex('wallets')
+            .where({ id: wallet.id })
+            .first();
+
+        // Log transaction
+        await this.transactionService.logTransaction({
+            wallet_id: wallet.id,
+            type: TransactionType.FUND,
+            direction: TransactionDirection.CREDIT,
+            amount,
+            status: TransactionStatus.SUCCESS,
+            description: `Wallet funded with ₦${amount}`,
+        });
+
+        return { status: true, message: 'Wallet funded successfully', balance: updatedWallet.balance };
     }
 }
