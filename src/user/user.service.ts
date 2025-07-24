@@ -1,11 +1,14 @@
-import { Injectable, Inject, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, Inject, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { Knex } from 'knex';
 import { User } from './user.model';
 import { IRequestUser } from 'src/middleware/interfaces/i-request-user';
-
+import { AdjutorService } from 'src/adjutor/adjutor.service';
 @Injectable()
 export class UserService {
-    constructor(@Inject('KNEX_CONNECTION') private readonly knex: Knex) { }
+    constructor(
+        @Inject('KNEX_CONNECTION') private readonly knex: Knex,
+        private readonly adjutorService: AdjutorService
+    ) { }
 
     async getAllUsers(): Promise<{ status: boolean; data: User[] }> {
         try {
@@ -16,8 +19,14 @@ export class UserService {
         }
     }
 
-    async registerUser({ id, name, email }: IRequestUser): Promise<{ status: boolean; data?: User }> {
+    async registerUser({ id, name, email }: IRequestUser): Promise<{ status: boolean; message?: string; data?: User }> {
         try {
+
+            const isBlacklisted = await this.adjutorService.isBlacklisted(email);
+            if (isBlacklisted) {
+                return { status: false, message: 'user is blacklisted' };
+            }
+
             await this.knex<User>('users').insert({ remote_user_id: id, name, email, });
             let registeredUser = await this.knex<User>('users').where({ email }).first();
 

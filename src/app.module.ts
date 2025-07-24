@@ -1,13 +1,20 @@
 import { MiddlewareConsumer, NestModule, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DbModule } from './database/db.module';
 import { UserModule } from './user/user.module';
 import { FauxAuthMiddleware } from './middleware/faux-auth.middleware';
+import { AdjutorModule } from './adjutor/adjutor.module';
 import * as morgan from 'morgan';
 
 @Module({
-  imports: [DbModule, UserModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+    DbModule, UserModule, AdjutorModule],
   controllers: [AppController],
   providers: [AppService],
 })
@@ -16,7 +23,7 @@ export class AppModule implements NestModule {
     consumer
       .apply(
         FauxAuthMiddleware,
-        morgan('dev') 
+        morgan('dev')
       )
       .forRoutes('*');
   }
