@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { TransactionStatus, TransactionDirection, TransactionType } from 'src/transaction/transaction.model';
 import { Knex } from 'knex';
 import { TransactionService } from 'src/transaction/transaction.service';
@@ -63,4 +63,43 @@ export class WalletService {
 
         return { status: true, message: 'Wallet funded successfully', balance: updatedWallet.balance };
     }
+
+    async withdraw(remoteUserId: number, amount: number) {
+        const user = await this.userService.getUserByRemoteId(remoteUserId);
+        if (!user)  return {status: false, message:'User not found'};
+
+        const wallet = await this.knex('wallets').where({ user_id: user.id }).first();
+        if (!wallet) return  {status: false, message:'wallet not found'};
+
+        const currentBalance = parseFloat(wallet.balance);
+        if (currentBalance < amount) {
+            return {status: false, message:'Insufficient balance'};
+        }
+
+        // Deduct balance
+        await this.knex('wallets')
+            .where({ id: wallet.id })
+            .update({
+                balance: this.knex.raw('balance - ?', [amount]),
+                updated_at: new Date(),
+            });
+
+
+        // Log transaction
+        await this.transactionService.logTransaction({
+            wallet_id: wallet.id,
+            type: TransactionType.WITHDRAW,
+            direction: TransactionDirection.DEBIT,
+            amount,
+            status: TransactionStatus.SUCCESS,
+            description: `Withdrawal of ₦${amount}`,
+        });
+
+        return {
+            status: true,
+            message: 'Withdrawal successful',
+            balance: currentBalance - amount,
+        };
+    }
+
 }
