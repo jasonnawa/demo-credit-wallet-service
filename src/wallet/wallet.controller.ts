@@ -4,6 +4,7 @@ import { WalletService } from './wallet.service';
 import { FundWalletDto } from './dto/fund-wallet.dto';
 import { Request } from 'express';
 import { WithdrawWalletDto } from './dto/withdraw-wallet.dto';
+import { TransferFromWalletDto } from './dto/transfer-wallet.dto';
 
 @Controller('wallets')
 export class WalletController {
@@ -25,5 +26,16 @@ export class WalletController {
 
     return this.walletService.withdraw(id, amount);
   }
+
+  @Post('transfer')
+async transferFunds(
+  @Req() req,
+  @Body() body: TransferFromWalletDto
+) {
+  const user = req.user;
+  const { recipientId, amount } = body;
+
+  return this.walletService.transferFunds(user.id, recipientId, amount);
+}
 
 }

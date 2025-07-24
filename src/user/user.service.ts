@@ -50,14 +50,10 @@ export class UserService {
     }
   }
 
-   async getUserByRemoteId(remoteUserId: number): Promise<User> {
+   async getUserByRemoteId(remoteUserId: number): Promise<User | undefined> {
     const user = await this.knex<User>('users')
       .where({ remote_user_id: remoteUserId })
       .first();
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
 
     return user;
   }
