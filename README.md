@@ -17,7 +17,7 @@ The wallet microservice enables:
 ---
 
 ## 🏗️ System Design & Folder Structure
-
+```
 src/
 │
 ├── adjutor/ # Adjutor API integration
@@ -52,7 +52,7 @@ src/
 │
 ├── app.module.ts
 └── main.ts
-
+```
 
 ## 📡 API Endpoints
 
@@ -63,11 +63,14 @@ src/
 Headers:
 Authorization: Bearer 12345
 Body:
+```
 {
    "name": "osikoyajason",
    "email":"osikoyajason8@gmail.com"
 }
+```
 Response:
+```
 {
   "status": true,
   "message": "User registered successfully",
@@ -79,14 +82,16 @@ Response:
     "remote_user_id": 12345
   }
 }
+```
 
 ###  Fund Wallet
 
 **POST** `/wallets/fund`
 
-Headers:
-Authorization: Bearer 12345
+Headers:  
+Authorization: Bearer 12345  
 Response:
+```
 {
   "status": true,
   "message": "Wallet funded successfully",
@@ -94,18 +99,21 @@ Response:
     "balance": 1000
   }
 }
-
+```
 ###  Withdraw from Wallet
 
 **POST** `/wallets/withdraw`
 
-Headers:
-Authorization: Bearer 12345
+Headers:  
+Authorization: Bearer 12345  
 Body:
+```
 {
   "amount": 500
 }
+```
 Response:
+```
 {
   "status": true,
   "message": "Withdrawal successful",
@@ -113,19 +121,22 @@ Response:
     "balance": 500
   }
 }
-
+```
 ###  Transfer Funds
 
 **POST** `/wallets/transfer`
 
-Headers:
-Authorization: Bearer 12345
+Headers:  
+Authorization: Bearer 12345  
 Body:
+```
 {
   "recipientId": 45678,
   "amount": 250
 }
+```
 Response:
+```
 {
   "status": true,
   "message": "Transfer successful",
@@ -133,7 +144,7 @@ Response:
     "amount": 250
   }
 }
-
+```
 
 ###  Adjutor Integration
 During registration, the service checks a user’s email against the Adjutor Karma Blacklist API.
@@ -145,6 +156,9 @@ Endpoint used:
 
 GET https://api.adjutor.com/verification/karma/:email
 Authorization: Bearer <API_KEY>
+
+###  E-R Diagram 
+![Diagram](./assets/erd_wallet_service.png)
 
 
 ## 🧪 How to Run Tests
