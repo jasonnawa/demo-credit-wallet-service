@@ -1,15 +1,15 @@
-import { Injectable, Inject, InternalServerErrorException, NotFoundException, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, InternalServerErrorException, forwardRef } from '@nestjs/common';
 import { Knex } from 'knex';
 import { User } from './user.model';
-import { IRequestUser } from 'src/middleware/interfaces/i-request-user';
 import { AdjutorService } from 'src/adjutor/adjutor.service';
 import { WalletService } from 'src/wallet/wallet.service';
+import { CreateUserDto } from './dto/create-user.dto';
 @Injectable()
 export class UserService {
   constructor(
     @Inject('KNEX_CONNECTION') private readonly knex: Knex,
     private readonly adjutorService: AdjutorService,
-     @Inject(forwardRef(() => WalletService))
+    @Inject(forwardRef(() => WalletService))
     private readonly walletService: WalletService,
   ) { }
 
@@ -22,8 +22,13 @@ export class UserService {
     }
   }
 
-  async registerUser({ id, name, email }: IRequestUser): Promise<{ status: boolean; message?: string; data?: User }> {
+  async registerUser({ id, name, email }: CreateUserDto): Promise<{ status: boolean; message?: string; data?: User }> {
     try {
+
+      const existingUser = await this.knex<User>('users').where({ remote_user_id: id }).first();
+      if (existingUser) {
+        return { status: false, message: 'User with this remote ID already exists' };
+      }
 
       const isBlacklisted = await this.adjutorService.isBlacklisted(email);
       if (isBlacklisted) {
@@ -38,19 +43,18 @@ export class UserService {
       try {
         await this.walletService.createWallet(registeredUser.id);
       } catch (walletError) {
-        //TODO: log error
         console.error('Wallet creation failed:', walletError);
         return { status: false, message: 'Wallet creation failed' };
       }
 
-      return { status: true, data: registeredUser };
+      return { status: true, message: 'User registered successfully', data: registeredUser };
     } catch (error) {
       console.error('Registration failed:', error);
-      throw new InternalServerErrorException('Failed to register user');
+      return { status: false, message: 'Failed to register user' };
     }
   }
 
-   async getUserByRemoteId(remoteUserId: number): Promise<User | undefined> {
+  async getUserByRemoteId(remoteUserId: number): Promise<User | undefined> {
     const user = await this.knex<User>('users')
       .where({ remote_user_id: remoteUserId })
       .first();

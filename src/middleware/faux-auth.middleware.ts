@@ -14,8 +14,6 @@ export class FauxAuthMiddleware implements NestMiddleware {
     // Simulated user lookup using token 
     const user = {
       id: parseInt(token),
-      email: 'demoemai@gmell.com',
-      name: 'Demo User', 
     };
 
     req['user'] = user;

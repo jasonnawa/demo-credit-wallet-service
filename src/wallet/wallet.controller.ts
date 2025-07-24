@@ -1,4 +1,3 @@
-// wallets/wallet.controller.ts
 import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { FundWalletDto } from './dto/fund-wallet.dto';

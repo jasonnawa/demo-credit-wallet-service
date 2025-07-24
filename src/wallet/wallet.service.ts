@@ -40,7 +40,7 @@ export class WalletService {
         if (!user) return { status: false, message: 'User not found' }
 
         const wallet = await this.knex('wallets').where({ user_id: user.id }).first();
-        if (!wallet) throw new NotFoundException('Wallet not found');
+        if (!wallet) return { status: false, message: 'Wallet not found' }
 
         // Update balance
         await this.knex('wallets')
@@ -61,7 +61,9 @@ export class WalletService {
             description: `Wallet funded with ₦${amount}`,
         });
 
-        return { status: true, message: 'Wallet funded successfully', balance: updatedWallet.balance };
+       const newBalance = parseFloat(updatedWallet.balance)
+
+        return { status: true, message: 'Wallet funded successfully', data: { balance: newBalance } };
     }
 
     async withdraw(remoteUserId: number, amount: number) {
@@ -95,10 +97,14 @@ export class WalletService {
             description: `Withdrawal of ₦${amount}`,
         });
 
+        const newBalance = parseFloat(currentBalance as any) - Number(amount);
+
         return {
             status: true,
             message: 'Withdrawal successful',
-            balance: currentBalance - amount,
+            data: {
+                balance: parseFloat(newBalance.toFixed(2))
+            }
         };
     }
 
@@ -162,11 +168,11 @@ export class WalletService {
             return {
                 status: true,
                 message: 'Transfer successful',
-                data: amount,
+                data: {amount},
             };
         } catch (error) {
             await trx.rollback();
-             return {
+            return {
                 status: false,
                 message: 'Transfer failed'
             };
