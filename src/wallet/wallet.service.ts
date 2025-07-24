@@ -1,8 +1,8 @@
-import { BadRequestException, forwardRef, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { TransactionStatus, TransactionDirection, TransactionType } from 'src/transaction/transaction.model';
+import { forwardRef, Inject, Injectable} from '@nestjs/common';
+import { TransactionStatus, TransactionDirection, TransactionType } from '../transaction/transaction.model';
 import { Knex } from 'knex';
-import { TransactionService } from 'src/transaction/transaction.service';
-import { UserService } from 'src/user/user.service';
+import { TransactionService } from '../transaction/transaction.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class WalletService {
@@ -114,7 +114,6 @@ export class WalletService {
             if (senderRemoteId === recipientRemoteId) return { status: false, message: 'Cannot transfer to same account' }
             const sender = await this.userService.getUserByRemoteId(senderRemoteId);
             const recipient = await this.userService.getUserByRemoteId(recipientRemoteId);
-
             if (!sender || !recipient) return { status: false, message: 'Sender or recipient not found' };
 
             const senderWallet = await trx('wallets').where({ user_id: sender.id }).first();
@@ -123,7 +122,7 @@ export class WalletService {
             if (!senderWallet || !recipientWallet) return { status: false, message: 'wallet(s) not found' };
 
             const senderBalance = parseFloat(senderWallet.balance);
-            if (senderBalance < amount) return { status: false, message: 'Insufficint funds' };
+            if (senderBalance < amount) return { status: false, message: 'Insufficient funds' };
 
             // Update sender (debit)
             await trx('wallets')

@@ -1,8 +1,8 @@
 import { Injectable, Inject, InternalServerErrorException, forwardRef } from '@nestjs/common';
 import { Knex } from 'knex';
 import { User } from './user.model';
-import { AdjutorService } from 'src/adjutor/adjutor.service';
-import { WalletService } from 'src/wallet/wallet.service';
+import { AdjutorService } from '../adjutor/adjutor.service';
+import { WalletService } from '../wallet/wallet.service';
 import { CreateUserDto } from './dto/create-user.dto';
 @Injectable()
 export class UserService {
@@ -43,13 +43,11 @@ export class UserService {
       try {
         await this.walletService.createWallet(registeredUser.id);
       } catch (walletError) {
-        console.error('Wallet creation failed:', walletError);
         return { status: false, message: 'Wallet creation failed' };
       }
 
       return { status: true, message: 'User registered successfully', data: registeredUser };
     } catch (error) {
-      console.error('Registration failed:', error);
       return { status: false, message: 'Failed to register user' };
     }
   }

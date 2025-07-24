@@ -24,7 +24,6 @@ export class AdjutorService {
             let karma = response.data.data.karma_type.karma
             return karma !== KarmaOptions.Others; //TODO: get all types
         } catch (error) {
-            console.error('Adjutor API error:', error?.response?.data || error.message);
             throw new InternalServerErrorException('Failed to contact Adjutor service');
         }
     }
