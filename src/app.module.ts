@@ -6,6 +6,7 @@ import { DbModule } from './database/db.module';
 import { UserModule } from './user/user.module';
 import { FauxAuthMiddleware } from './middleware/faux-auth.middleware';
 import { AdjutorModule } from './adjutor/adjutor.module';
+import { WalletModule } from './wallet/wallet.module';
 import * as morgan from 'morgan';
 
 @Module({
@@ -14,7 +15,7 @@ import * as morgan from 'morgan';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    DbModule, UserModule, AdjutorModule],
+    DbModule, UserModule, AdjutorModule, WalletModule],
   controllers: [AppController],
   providers: [AppService],
 })
